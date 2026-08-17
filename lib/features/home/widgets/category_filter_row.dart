@@ -10,6 +10,9 @@ class CategoryFilterRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final selectedCategory = ref.watch(selectedCategoryProvider);
 
     return SizedBox(
@@ -32,12 +35,34 @@ class CategoryFilterRow extends ConsumerWidget {
             icon = Icons.lock_outline_rounded;
           }
 
-          return M3EChip(
-            label: category,
-            leading: icon != null ? Icon(icon, size: 16) : null,
-            type: M3EChipType.filter,
+          return FilterChip(
+            label: Text(category),
+            avatar: icon != null
+                ? Icon(
+                    icon,
+                    size: 16,
+                    color: isSelected
+                        ? colorScheme.onSecondaryContainer
+                        : colorScheme.onSurfaceVariant,
+                  )
+                : null,
             selected: isSelected,
-            onPressed: () {
+            showCheckmark: false,
+            selectedColor: colorScheme.secondaryContainer,
+            backgroundColor: colorScheme.surface,
+            side: BorderSide(
+              color: isSelected ? Colors.transparent : colorScheme.outlineVariant,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(100),
+            ),
+            labelStyle: (textTheme.labelLarge ?? const TextStyle(fontSize: 13)).copyWith(
+              color: isSelected
+                  ? colorScheme.onSecondaryContainer
+                  : colorScheme.onSurfaceVariant,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            ),
+            onSelected: (_) {
               ref
                   .read(selectedCategoryProvider.notifier)
                   .selectCategory(category);

@@ -164,8 +164,9 @@ class DetailScreen extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final theme = M3ETheme.of(ctx);
+        final theme = Theme.of(ctx);
         final scheme = theme.colorScheme;
+        final textTheme = theme.textTheme;
         final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
 
         return Padding(
@@ -186,19 +187,31 @@ class DetailScreen extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.edit_note_rounded, color: scheme.primary, size: 28),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.edit_note_rounded,
+                          color: scheme.onPrimaryContainer,
+                          size: 24,
+                        ),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Add / Edit Content',
-                          style: theme.typeScale.titleLarge.copyWith(
+                          style: (textTheme.titleLarge ?? const TextStyle(fontSize: 18)).copyWith(
                             fontWeight: FontWeight.bold,
+                            color: scheme.onSurface,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close),
+                        icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
                         onPressed: () => Navigator.of(ctx).pop(),
                       ),
                     ],
@@ -206,7 +219,7 @@ class DetailScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Paste post text, caption, or article excerpts to generate an accurate AI summary.',
-                    style: theme.typeScale.bodyMedium.copyWith(
+                    style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -218,7 +231,7 @@ class DetailScreen extends ConsumerWidget {
                       filled: true,
                       fillColor: scheme.surfaceContainerLowest,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                   ),
@@ -233,7 +246,7 @@ class DetailScreen extends ConsumerWidget {
                       filled: true,
                       fillColor: scheme.surfaceContainerLowest,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.paste_rounded),
@@ -250,8 +263,8 @@ class DetailScreen extends ConsumerWidget {
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
-                    child: M3EButton(
+                    height: 48,
+                    child: FilledButton(
                       onPressed: () {
                         final text = contentController.text.trim();
                         if (text.isEmpty) return;
@@ -316,8 +329,9 @@ class DetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = M3ETheme.of(context);
+    final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final itemAsync = ref.watch(itemDetailProvider(id));
 
     return itemAsync.when(
@@ -336,10 +350,10 @@ class DetailScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     'Item no longer exists.',
-                    style: theme.typeScale.titleMedium,
+                    style: textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
-                  M3EButton(
+                  FilledButton(
                     onPressed: () => context.pop(),
                     child: const Text('Go Back'),
                   ),
@@ -347,7 +361,9 @@ class DetailScreen extends ConsumerWidget {
               ),
             ),
           );
-        }        // Automatically mark unread items as read when viewed in detail screen
+        }
+
+        // Automatically mark unread items as read when viewed in detail screen
         if (!item.isRead) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref
@@ -434,8 +450,11 @@ class DetailScreen extends ConsumerWidget {
                       placeholder: (ctx, url) => Container(
                         height: 210,
                         color: scheme.surfaceContainerHighest,
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: scheme.primary,
+                          ),
                         ),
                       ),
                       errorWidget: (ctx, url, error) => const SizedBox.shrink(),
@@ -447,7 +466,7 @@ class DetailScreen extends ConsumerWidget {
                 // Title
                 Text(
                   item.title?.isNotEmpty == true ? item.title! : item.url,
-                  style: theme.typeScale.headlineSmall.copyWith(
+                  style: (textTheme.headlineSmall ?? const TextStyle(fontSize: 24)).copyWith(
                     fontWeight: FontWeight.bold,
                     color: scheme.onSurface,
                     height: 1.3,
@@ -473,9 +492,9 @@ class DetailScreen extends ConsumerWidget {
                         Flexible(
                           child: Text(
                             Uri.tryParse(item.url)?.host ?? item.url,
-                            style: theme.typeScale.bodySmall.copyWith(
+                            style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                               color: scheme.primary,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -486,17 +505,40 @@ class DetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Metadata Row: Category & Reading Time & Date
+                // Metadata Row: Category & Reading Time & Date & Tags
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     if (item.category != null && item.category!.isNotEmpty)
-                      M3EChip(
-                        label: item.category!,
-                        type: M3EChipType.assist,
-                        leading: const Icon(Icons.category_outlined, size: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: scheme.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.category_outlined,
+                              size: 15,
+                              color: scheme.onTertiaryContainer,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              item.category!,
+                              style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
+                                color: scheme.onTertiaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -505,7 +547,7 @@ class DetailScreen extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -518,7 +560,7 @@ class DetailScreen extends ConsumerWidget {
                           const SizedBox(width: 5),
                           Text(
                             readingTime,
-                            style: theme.typeScale.labelMedium.copyWith(
+                            style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
@@ -532,25 +574,57 @@ class DetailScreen extends ConsumerWidget {
                       ),
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(100),
                       ),
-                      child: Text(
-                        dateStr,
-                        style: theme.typeScale.labelMedium.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 13,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            dateStr,
+                            style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     if (item.tags != null)
                       for (final tag in item.tags!)
-                        M3EChip(label: '#$tag', type: M3EChipType.suggestion),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(100),
+                            border: Border.all(color: scheme.outlineVariant),
+                          ),
+                          child: Text(
+                            '#$tag',
+                            style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
+                              color: scheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
                   ],
                 ),
                 const SizedBox(height: 24),
 
                 // Processing Status Banner
                 if (item.isProcessing) ...[
-                  M3ECard(
+                  Card(
+                    color: scheme.surfaceContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(18),
                       child: Row(
@@ -563,14 +637,15 @@ class DetailScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Summarizing content…',
-                                  style: theme.typeScale.titleSmall.copyWith(
+                                  style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
                                     fontWeight: FontWeight.bold,
+                                    color: scheme.primary,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Our AI is extracting key takeaways.',
-                                  style: theme.typeScale.bodySmall.copyWith(
+                                  style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                                     color: scheme.onSurfaceVariant,
                                   ),
                                 ),
@@ -586,8 +661,11 @@ class DetailScreen extends ConsumerWidget {
 
                 // Failed / Blocked Status Banner
                 if (item.isFailed) ...[
-                  M3ECard(
+                  Card(
                     color: scheme.errorContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(18),
                       child: Column(
@@ -604,7 +682,7 @@ class DetailScreen extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   "Couldn't Read Post Automatically",
-                                  style: theme.typeScale.titleSmall.copyWith(
+                                  style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: scheme.onErrorContainer,
                                   ),
@@ -616,7 +694,7 @@ class DetailScreen extends ConsumerWidget {
                           Text(
                             item.summary ??
                                 'This platform requires authentication or blocked automated reading.',
-                            style: theme.typeScale.bodyMedium.copyWith(
+                            style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                               color: scheme.onErrorContainer,
                               height: 1.4,
                             ),
@@ -626,17 +704,11 @@ class DetailScreen extends ConsumerWidget {
                             spacing: 10,
                             runSpacing: 10,
                             children: [
-                              M3EButton(
+                              FilledButton.icon(
                                 onPressed: () =>
                                     _showManualCaptionDialog(context, ref, item),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.edit_note_rounded, size: 18),
-                                    SizedBox(width: 6),
-                                    Text('Paste Caption Manually'),
-                                  ],
-                                ),
+                                icon: const Icon(Icons.edit_note_rounded, size: 18),
+                                label: const Text('Paste Caption Manually'),
                               ),
                               OutlinedButton.icon(
                                 onPressed: () {
@@ -672,7 +744,7 @@ class DetailScreen extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         'AI Summary',
-                        style: theme.typeScale.titleMedium.copyWith(
+                        style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
                           fontWeight: FontWeight.bold,
                           color: scheme.primary,
                         ),
@@ -680,13 +752,18 @@ class DetailScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  M3ECard(
+                  Card(
+                    color: scheme.surfaceContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    elevation: 0,
                     child: Padding(
                       padding: const EdgeInsets.all(18),
                       child: Text(
                         item.summary!,
-                        style: theme.typeScale.bodyLarge.copyWith(
-                          height: 1.6,
+                        style: (textTheme.bodyLarge ?? const TextStyle(fontSize: 15)).copyWith(
+                          height: 1.5,
                           color: scheme.onSurface,
                         ),
                       ),
@@ -705,7 +782,7 @@ class DetailScreen extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         'Key Takeaways',
-                        style: theme.typeScale.titleMedium.copyWith(
+                        style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
                           fontWeight: FontWeight.bold,
                           color: scheme.onSurface,
                         ),
@@ -732,7 +809,7 @@ class DetailScreen extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               point,
-                              style: theme.typeScale.bodyMedium.copyWith(
+                              style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                                 height: 1.5,
                                 color: scheme.onSurface,
                               ),
@@ -758,7 +835,7 @@ class DetailScreen extends ConsumerWidget {
                       childrenPadding: EdgeInsets.zero,
                       title: Text(
                         'Extracted Content',
-                        style: theme.typeScale.titleSmall.copyWith(
+                        style: (textTheme.titleSmall ?? const TextStyle(fontSize: 14)).copyWith(
                           fontWeight: FontWeight.bold,
                           color: scheme.onSurfaceVariant,
                         ),
@@ -781,14 +858,14 @@ class DetailScreen extends ConsumerWidget {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: scheme.surfaceContainerHighest.withAlpha(80),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: scheme.outlineVariant.withAlpha(100),
                             ),
                           ),
                           child: SelectableText(
                             item.rawContent!,
-                            style: theme.typeScale.bodySmall.copyWith(
+                            style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                               color: scheme.onSurfaceVariant,
                               height: 1.5,
                             ),

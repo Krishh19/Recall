@@ -76,8 +76,9 @@ class FeedEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
+    final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final isFiltered = selectedCategory != 'All';
     final assetPath = _assetPathForCategory(selectedCategory);
     final title = _titleForCategory(selectedCategory);
@@ -118,7 +119,7 @@ class FeedEmptyState extends StatelessWidget {
             // Headline
             Text(
               title,
-              style: theme.typeScale.headlineSmall.copyWith(
+              style: (textTheme.titleLarge ?? const TextStyle(fontSize: 18)).copyWith(
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onSurface,
               ),
@@ -127,33 +128,32 @@ class FeedEmptyState extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Supporting description
-            Text(
-              subtitle,
-              style: theme.typeScale.bodyMedium.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                height: 1.4,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 320),
+              child: Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
 
             // Primary action button
             if (isFiltered)
-              M3EButton(
+              FilledButton(
                 onPressed: onResetFilter,
                 child: const Text('Show All Items'),
               )
             else
-              M3EButton(
+              FilledButton.icon(
                 onPressed: () => ManualAddUrlDialog.show(context),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add_link, size: 18),
-                    SizedBox(width: 8),
-                    Text('Add Your First Link'),
-                  ],
-                ),
+                icon: const Icon(Icons.add_link, size: 18),
+                label: const Text('Add Your First Link'),
               ),
           ],
         ),

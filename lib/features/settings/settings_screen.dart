@@ -118,19 +118,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon, M3EThemeData theme) {
+  Widget _buildSectionHeader(String title, IconData icon, ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: theme.colorScheme.primary),
+          Icon(icon, size: 18, color: colorScheme.primary),
           const SizedBox(width: 8),
           Text(
             title,
-            style: theme.typeScale.titleSmall.copyWith(
-              color: theme.colorScheme.primary,
+            style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
+              color: colorScheme.primary,
               fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+              letterSpacing: 0.2,
             ),
           ),
         ],
@@ -140,8 +143,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
+    final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final currentThemeMode = ref.watch(themeControllerProvider);
     final digestSettings = ref.watch(digestSettingsControllerProvider);
 
@@ -155,7 +159,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           // ─── Section 1: Appearance ───
           _buildSectionHeader('Appearance', Icons.palette_outlined, theme),
-          M3ECard(
+          Card(
+            color: scheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 0,
+            margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -163,14 +173,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   Text(
                     'Theme Mode',
-                    style: theme.typeScale.titleMedium.copyWith(
+                    style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Choose your preferred visual style across Recall.',
-                    style: theme.typeScale.bodySmall.copyWith(
+                    style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -213,11 +223,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           // ─── Section 2: AI Intelligence ───
           _buildSectionHeader('AI Intelligence', Icons.auto_awesome, theme),
-          M3ECard(
+          Card(
+            color: scheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 0,
+            margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -225,10 +241,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   Row(
                     children: [
+                      Icon(Icons.key_outlined, size: 20, color: scheme.primary),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Google Gemini 2.5 Flash',
-                          style: theme.typeScale.titleMedium.copyWith(
+                          style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -237,14 +255,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
+                          horizontal: 10,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
                           color: _hasSavedKey
-                              ? Colors.green.withAlpha(30)
-                              : Colors.orange.withAlpha(30),
-                          borderRadius: BorderRadius.circular(8),
+                              ? scheme.primaryContainer
+                              : scheme.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(100),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -255,16 +273,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   : Icons.info_outline_rounded,
                               size: 13,
                               color: _hasSavedKey
-                                  ? Colors.green.shade700
-                                  : Colors.orange.shade800,
+                                  ? scheme.onPrimaryContainer
+                                  : scheme.onTertiaryContainer,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               _hasSavedKey ? 'Configured' : 'Needs Key',
-                              style: theme.typeScale.labelSmall.copyWith(
+                              style: (textTheme.labelSmall ?? const TextStyle(fontSize: 11)).copyWith(
                                 color: _hasSavedKey
-                                    ? Colors.green.shade700
-                                    : Colors.orange.shade800,
+                                    ? scheme.onPrimaryContainer
+                                    : scheme.onTertiaryContainer,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -276,7 +294,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const SizedBox(height: 6),
                   Text(
                     'Summaries, key takeaways, categories, and tags are generated directly using your Gemini API key.',
-                    style: theme.typeScale.bodySmall.copyWith(
+                    style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -293,11 +311,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       filled: true,
                       fillColor: scheme.surfaceContainerLowest,
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
+                        horizontal: 16,
+                        vertical: 14,
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: scheme.outlineVariant),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: scheme.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: scheme.primary, width: 1.5),
                       ),
                       suffixIcon: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -308,6 +335,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
                               size: 20,
+                              color: scheme.onSurfaceVariant,
                             ),
                             tooltip: _obscureApiKey ? 'Show key' : 'Hide key',
                             onPressed: () {
@@ -316,7 +344,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           if (_apiKeyController.text.isNotEmpty)
                             IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 20),
+                              icon: Icon(
+                                Icons.clear_rounded,
+                                size: 20,
+                                color: scheme.onSurfaceVariant,
+                              ),
                               tooltip: 'Clear',
                               onPressed: () {
                                 setState(() => _apiKeyController.clear());
@@ -325,12 +357,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             )
                           else
                             IconButton(
-                              icon: const Icon(Icons.content_paste_rounded, size: 20),
+                              icon: Icon(
+                                Icons.content_paste_rounded,
+                                size: 20,
+                                color: scheme.onSurfaceVariant,
+                              ),
                               tooltip: 'Paste from clipboard',
                               onPressed: _pasteFromClipboard,
                             ),
                         ],
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Your key stays on this device — used only to call Gemini directly.',
+                    style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -349,13 +393,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             children: [
                               Text(
                                 'Get free API key',
-                                style: theme.typeScale.labelMedium.copyWith(
+                                style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
                                   color: scheme.primary,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),
                               ),
-                              const SizedBox(width: 2),
+                              const SizedBox(width: 4),
                               Icon(
                                 Icons.open_in_new_rounded,
                                 size: 13,
@@ -366,13 +410,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                       const Spacer(),
-                      M3EButton(
+                      FilledButton(
                         onPressed: _isSaving ? null : _saveApiKey,
                         child: _isSaving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: scheme.onPrimary,
+                                ),
                               )
                             : const Text('Save Key'),
                       ),
@@ -383,11 +430,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           // ─── Section 3: Notifications ───
           _buildSectionHeader('Notifications', Icons.notifications_outlined, theme),
-          M3ECard(
+          Card(
+            color: scheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 0,
+            margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -396,13 +449,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(
                       'Weekly Digest Notification',
-                      style: theme.typeScale.titleSmall.copyWith(
+                      style: (textTheme.titleSmall ?? const TextStyle(fontSize: 14)).copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     subtitle: Text(
                       'Receive a gentle summary of unread bookmarks saved during the week.',
-                      style: theme.typeScale.bodySmall.copyWith(
+                      style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -420,19 +473,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     },
                   ),
                   if (digestSettings.enabled) ...[
-                    const Divider(height: 20),
+                    Divider(color: scheme.outlineVariant, height: 20),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(
                         Icons.schedule_rounded,
                         color: scheme.primary,
                       ),
-                      title: const Text('Delivery Schedule'),
+                      title: Text(
+                        'Delivery Schedule',
+                        style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                      ),
                       subtitle: Text(
                         'Every ${DigestSettings.dayName(digestSettings.dayOfWeek)} at ${digestSettings.hour.toString().padLeft(2, '0')}:${digestSettings.minute.toString().padLeft(2, '0')}',
-                        style: theme.typeScale.bodySmall,
+                        style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
                       ),
-                      trailing: const Icon(Icons.chevron_right),
+                      trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
                       onTap: () async {
                         final time = await showTimePicker(
                           context: context,
@@ -460,11 +516,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           // ─── Section 4: Export & Backup ───
           _buildSectionHeader('Export & Backup', Icons.ios_share_rounded, theme),
-          M3ECard(
+          Card(
+            color: scheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 0,
+            margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
@@ -472,7 +534,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Container(
-                      padding: const EdgeInsets.all(8),
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: scheme.primaryContainer,
                         shape: BoxShape.circle,
@@ -483,9 +546,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         size: 20,
                       ),
                     ),
-                    title: const Text('Export as Markdown (.md)'),
-                    subtitle: const Text('Formatted for Obsidian, Notion & Bear'),
-                    trailing: const Icon(Icons.chevron_right),
+                    title: Text(
+                      'Export as Markdown (.md)',
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      'Formatted for Obsidian, Notion & Bear',
+                      style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                    trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
                     onTap: () async {
                       final items = await ref
                           .read(savedItemRepositoryProvider)
@@ -497,11 +566,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       );
                     },
                   ),
-                  const Divider(height: 1),
+                  Divider(color: scheme.outlineVariant, height: 1),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Container(
-                      padding: const EdgeInsets.all(8),
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: scheme.secondaryContainer,
                         shape: BoxShape.circle,
@@ -512,9 +582,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         size: 20,
                       ),
                     ),
-                    title: const Text('Export as JSON (.json)'),
-                    subtitle: const Text('Full raw structured backup with metadata'),
-                    trailing: const Icon(Icons.chevron_right),
+                    title: Text(
+                      'Export as JSON (.json)',
+                      style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      'Full raw structured backup with metadata',
+                      style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                    trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
                     onTap: () async {
                       final items = await ref
                           .read(savedItemRepositoryProvider)
@@ -531,17 +607,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
           // ─── Section 5: Privacy & Local Storage ───
           _buildSectionHeader('Storage & Privacy', Icons.shield_outlined, theme),
-          M3ECard(
+          Card(
+            color: scheme.surfaceContainer,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 0,
+            margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: scheme.primaryContainer,
                       shape: BoxShape.circle,
@@ -549,7 +632,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     child: Icon(
                       Icons.lock_outline_rounded,
                       color: scheme.onPrimaryContainer,
-                      size: 22,
+                      size: 20,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -559,14 +642,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       children: [
                         Text(
                           '100% Local & Private',
-                          style: theme.typeScale.titleSmall.copyWith(
+                          style: (textTheme.titleSmall ?? const TextStyle(fontSize: 14)).copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'All saved links, raw content, and AI summaries reside locally on your device inside SQLite.',
-                          style: theme.typeScale.bodySmall.copyWith(
+                          style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),

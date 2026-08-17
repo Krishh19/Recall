@@ -124,8 +124,9 @@ class _ManualAddUrlDialogState extends ConsumerState<ManualAddUrlDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
+    final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -145,17 +146,25 @@ class _ManualAddUrlDialogState extends ConsumerState<ManualAddUrlDialog> {
         children: [
           Row(
             children: [
-              Icon(Icons.link, color: scheme.primary, size: 28),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: scheme.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.link, color: scheme.onPrimaryContainer, size: 24),
+              ),
               const SizedBox(width: 12),
               Text(
                 'Save Link',
-                style: theme.typeScale.headlineSmall.copyWith(
+                style: (textTheme.headlineSmall ?? const TextStyle(fontSize: 24)).copyWith(
                   fontWeight: FontWeight.bold,
+                  color: scheme.onSurface,
                 ),
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
@@ -163,7 +172,7 @@ class _ManualAddUrlDialogState extends ConsumerState<ManualAddUrlDialog> {
           const SizedBox(height: 8),
           Text(
             'Paste any article, YouTube video, Twitter/X post, or webpage to summarize.',
-            style: theme.typeScale.bodyMedium.copyWith(
+            style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
@@ -177,12 +186,19 @@ class _ManualAddUrlDialogState extends ConsumerState<ManualAddUrlDialog> {
               filled: true,
               fillColor: scheme.surfaceContainerLowest,
               errorText: _errorMessage,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(color: scheme.outlineVariant),
               ),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.paste_rounded),
+                icon: Icon(
+                  Icons.paste_rounded,
+                  color: scheme.onSurfaceVariant,
+                ),
                 tooltip: 'Paste from clipboard',
                 onPressed: _pasteFromClipboard,
               ),
@@ -192,14 +208,17 @@ class _ManualAddUrlDialogState extends ConsumerState<ManualAddUrlDialog> {
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            height: 50,
-            child: M3EButton(
+            height: 48,
+            child: FilledButton(
               onPressed: _isLoading ? null : _saveUrl,
               child: _isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: scheme.onPrimary,
+                      ),
                     )
                   : const Text('Save & Summarize'),
             ),

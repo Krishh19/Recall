@@ -21,16 +21,19 @@ class RecallApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Recall',
-      theme: AppTheme.light.toThemeData(),
-      darkTheme: AppTheme.dark.toThemeData(),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       debugShowCheckedModeBanner: false,
       routerConfig: goRouter,
       builder: (context, child) {
+        final isDark = themeMode == ThemeMode.dark ||
+            (themeMode == ThemeMode.system &&
+                MediaQuery.platformBrightnessOf(context) == Brightness.dark);
         return M3ETheme(
-          data: AppTheme.light,
+          data: isDark ? AppTheme.dark : AppTheme.light,
           autoTheming: themeMode == ThemeMode.system,
-          dynamicColoring: true,
+          dynamicColoring: false,
           initialTheme: switch (themeMode) {
             ThemeMode.system => null,
             ThemeMode.light => Brightness.light,

@@ -31,16 +31,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = M3ETheme.of(context);
+    final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final searchResultsAsync = ref.watch(searchResultsProvider);
     final currentQuery = ref.watch(searchQueryProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Recall'),
+        title: Text(
+          'Search Recall',
+          style: (textTheme.titleLarge ?? const TextStyle(fontSize: 18)).copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: scheme.onSurface),
           onPressed: () => context.pop(),
         ),
       ),
@@ -51,7 +57,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             child: M3ESearchAnchor.bar(
               searchController: _searchController,
               barHintText: 'Search by title, summary, or #tag…',
-              barLeading: const Icon(Icons.search),
+              barLeading: Icon(Icons.search, color: scheme.onSurfaceVariant),
               onChanged: (query) {
                 ref.read(searchQueryProvider.notifier).setQuery(query);
               },
@@ -79,7 +85,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         query.isEmpty
                             ? 'Start typing to search your library'
                             : 'No results found for "$query"',
-                        style: theme.typeScale.bodyMedium.copyWith(
+                        style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
@@ -100,7 +106,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               },
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: scheme.outlineVariant),
           Expanded(
             child: searchResultsAsync.when(
               data: (items) {
@@ -109,22 +115,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.search,
-                          size: 48,
-                          color: scheme.primary.withAlpha(120),
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.search,
+                            size: 40,
+                            color: scheme.primary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Search your saved links',
-                          style: theme.typeScale.titleMedium.copyWith(
+                          style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
+                            fontWeight: FontWeight.bold,
                             color: scheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Search through AI summaries, titles, and topics',
-                          style: theme.typeScale.bodySmall.copyWith(
+                          style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -138,20 +153,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 48,
-                          color: scheme.onSurfaceVariant,
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.search_off,
+                            size: 40,
+                            color: scheme.onSurfaceVariant,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'No results found',
-                          style: theme.typeScale.titleMedium,
+                          style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Try searching for a different keyword or tag',
-                          style: theme.typeScale.bodySmall.copyWith(
+                          style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -173,7 +198,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => Center(
+                child: CircularProgressIndicator(color: scheme.primary),
+              ),
               error: (error, stack) =>
                   Center(child: Text('Search error: $error')),
             ),

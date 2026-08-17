@@ -132,13 +132,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final theme = M3ETheme.of(ctx);
+        final theme = Theme.of(ctx);
         final scheme = theme.colorScheme;
+        final textTheme = theme.textTheme;
 
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: scheme.surfaceContainerHigh,
+            color: scheme.surfaceContainerLow,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: Column(
@@ -147,17 +148,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.ios_share_rounded, color: scheme.primary, size: 28),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.ios_share_rounded,
+                      color: scheme.onPrimaryContainer,
+                      size: 24,
+                    ),
+                  ),
                   const SizedBox(width: 12),
                   Text(
                     'Export Library',
-                    style: theme.typeScale.titleLarge.copyWith(
+                    style: (textTheme.titleLarge ?? const TextStyle(fontSize: 18)).copyWith(
                       fontWeight: FontWeight.bold,
+                      color: scheme.onSurface,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
                     onPressed: () => Navigator.of(ctx).pop(),
                   ),
                 ],
@@ -165,14 +178,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 12),
               Text(
                 'Export all ${items.length} saved bookmarks for Obsidian, Notion, or personal archives.',
-                style: theme.typeScale.bodyMedium.copyWith(
+                style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 20),
               ListTile(
+                contentPadding: EdgeInsets.zero,
                 leading: Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: scheme.primaryContainer,
                     shape: BoxShape.circle,
@@ -180,19 +195,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Icon(
                     Icons.description_outlined,
                     color: scheme.onPrimaryContainer,
+                    size: 20,
                   ),
                 ),
-                title: const Text('Export as Markdown (.md)'),
-                subtitle: const Text('Formatted for Obsidian, Notion & Bear'),
+                title: Text(
+                  'Export as Markdown (.md)',
+                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  'Formatted for Obsidian, Notion & Bear',
+                  style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+                trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   final md = ExportService.toMarkdown(items);
                   await ExportService.shareText(md, subject: 'Recall Library Export');
                 },
               ),
+              Divider(color: scheme.outlineVariant, height: 1),
               ListTile(
+                contentPadding: EdgeInsets.zero,
                 leading: Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: scheme.secondaryContainer,
                     shape: BoxShape.circle,
@@ -200,19 +226,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Icon(
                     Icons.code_rounded,
                     color: scheme.onSecondaryContainer,
+                    size: 20,
                   ),
                 ),
-                title: const Text('Export as JSON (.json)'),
-                subtitle: const Text('Raw structured data with all metadata'),
+                title: Text(
+                  'Export as JSON (.json)',
+                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  'Raw structured data with all metadata',
+                  style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+                trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   final jsonStr = ExportService.toJson(items);
                   await ExportService.shareText(jsonStr, subject: 'Recall JSON Export');
                 },
               ),
+              Divider(color: scheme.outlineVariant, height: 1),
               ListTile(
+                contentPadding: EdgeInsets.zero,
                 leading: Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: scheme.tertiaryContainer,
                     shape: BoxShape.circle,
@@ -220,9 +257,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Icon(
                     Icons.copy_rounded,
                     color: scheme.onTertiaryContainer,
+                    size: 20,
                   ),
                 ),
-                title: const Text('Copy Markdown to Clipboard'),
+                title: Text(
+                  'Copy Markdown to Clipboard',
+                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  'Paste directly into notes or editors',
+                  style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+                trailing: Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
                 onTap: () async {
                   Navigator.of(ctx).pop();
                   final md = ExportService.toMarkdown(items);
@@ -250,8 +296,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     });
 
-    final theme = M3ETheme.of(context);
+    final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final feedAsync = ref.watch(savedItemsFeedProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final currentItems = feedAsync.value ?? [];
@@ -265,7 +312,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           title: Text(
             '${_selectedIds.length} Selected',
-            style: theme.typeScale.titleLarge,
+            style: textTheme.titleLarge,
           ),
           actions: [
             TextButton(
@@ -279,15 +326,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return M3EAppBar.search(
         searchController: _searchController,
         barHintText: 'Search saved links, summaries, tags…',
-        barLeading: const Icon(Icons.search),
+        barLeading: Icon(Icons.search, color: scheme.onSurfaceVariant),
         barTrailing: [
           IconButton(
-            icon: const Icon(Icons.ios_share_outlined),
+            icon: Icon(Icons.ios_share_outlined, color: scheme.onSurfaceVariant),
             tooltip: 'Export Library',
             onPressed: () => _showExportSheet(context, currentItems),
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
+            icon: Icon(Icons.settings_outlined, color: scheme.onSurfaceVariant),
             tooltip: 'Settings',
             onPressed: () => context.push('/settings'),
           ),
@@ -313,7 +360,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   query.isEmpty
                       ? 'Type to search across all your saved bookmarks'
                       : 'No items matching "$query"',
-                  style: theme.typeScale.bodyMedium.copyWith(
+                  style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                   textAlign: TextAlign.center,
@@ -344,29 +391,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHigh,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(20),
-                      blurRadius: 8,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
+                  border: Border(top: BorderSide(color: scheme.outlineVariant)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.archive_outlined),
+                      icon: Icon(Icons.archive_outlined, color: scheme.onSurfaceVariant),
                       tooltip: 'Archive Selected',
                       onPressed: _selectedIds.isEmpty ? null : _bulkArchive,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.star_rounded),
+                      icon: Icon(Icons.star_rounded, color: scheme.primary),
                       tooltip: 'Favorite Selected',
                       onPressed: _selectedIds.isEmpty ? null : _bulkFavorite,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.delete_outline),
+                      icon: Icon(Icons.delete_outline, color: scheme.error),
                       tooltip: 'Delete Selected',
                       onPressed: _selectedIds.isEmpty ? null : _bulkDelete,
                     ),
@@ -381,90 +422,103 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const CategoryFilterRow(),
           const SizedBox(height: 8),
           Expanded(
-            child: feedAsync.when(
-              data: (items) {
-                if (items.isEmpty) {
-                  return FeedEmptyState(
-                    selectedCategory: selectedCategory,
-                    onResetFilter: selectedCategory != 'All'
-                        ? () {
-                            ref
-                                .read(selectedCategoryProvider.notifier)
-                                .selectCategory('All');
-                            ref
-                                .read(unreadOnlyFilterProvider.notifier)
-                                .setUnreadOnly(false);
-                          }
-                        : null,
-                  );
-                }
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: feedAsync.when(
+                data: (items) {
+                  if (items.isEmpty) {
+                    return FeedEmptyState(
+                      key: ValueKey('empty_${selectedCategory}'),
+                      selectedCategory: selectedCategory,
+                      onResetFilter: selectedCategory != 'All'
+                          ? () {
+                              ref
+                                  .read(selectedCategoryProvider.notifier)
+                                  .selectCategory('All');
+                              ref
+                                  .read(unreadOnlyFilterProvider.notifier)
+                                  .setUnreadOnly(false);
+                            }
+                          : null,
+                    );
+                  }
 
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    ref.invalidate(savedItemsFeedProvider);
-                  },
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    itemCount: items.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final isSelected = _selectedIds.contains(item.id);
-
-                      return FeedItemTile(
-                        item: item,
-                        selected: isSelected,
-                        selectionMode: _isSelectionMode,
-                        onTap: () {
-                          if (_isSelectionMode) {
-                            _toggleSelection(item.id);
-                          } else {
-                            context.push('/detail/${item.id}');
-                          }
-                        },
-                        onLongPress: () {
-                          if (!_isSelectionMode) {
-                            setState(() {
-                              _isSelectionMode = true;
-                              _selectedIds.add(item.id);
-                            });
-                          }
-                        },
-                      );
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      ref.invalidate(savedItemsFeedProvider);
                     },
-                  ),
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 48, color: scheme.error),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Failed to load saved items',
-                        style: theme.typeScale.titleMedium,
+                    child: ListView.separated(
+                      key: ValueKey('feed_${selectedCategory}_${items.length}'),
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        top: 8,
+                        bottom: 88, // 88px bottom padding to prevent FAB overlap
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        error.toString(),
-                        style: theme.typeScale.bodySmall.copyWith(
-                          color: scheme.onSurfaceVariant,
+                      itemCount: items.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        final isSelected = _selectedIds.contains(item.id);
+
+                        return FeedItemTile(
+                          item: item,
+                          selected: isSelected,
+                          selectionMode: _isSelectionMode,
+                          onTap: () {
+                            if (_isSelectionMode) {
+                              _toggleSelection(item.id);
+                            } else {
+                              context.push('/detail/${item.id}');
+                            }
+                          },
+                          onLongPress: () {
+                            if (!_isSelectionMode) {
+                              setState(() {
+                                _isSelectionMode = true;
+                                _selectedIds.add(item.id);
+                              });
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+                loading: () => Center(
+                  child: CircularProgressIndicator(color: scheme.primary),
+                ),
+                error: (error, stack) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline, size: 48, color: scheme.error),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Failed to load saved items',
+                          style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      M3EButton(
-                        onPressed: () => ref.invalidate(savedItemsFeedProvider),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Text(
+                          error.toString(),
+                          style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: () => ref.invalidate(savedItemsFeedProvider),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

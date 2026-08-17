@@ -24,8 +24,9 @@ class SaveConfirmationSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = M3ETheme.of(context);
+    final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final itemAsync = ref.watch(itemDetailProvider(itemId));
 
     return Padding(
@@ -54,14 +55,14 @@ class SaveConfirmationSheet extends ConsumerWidget {
               Expanded(
                 child: Text(
                   'Saved to Recall',
-                  style: theme.typeScale.titleLarge.copyWith(
+                  style: (textTheme.titleLarge ?? const TextStyle(fontSize: 18)).copyWith(
                     fontWeight: FontWeight.bold,
                     color: scheme.onSurface,
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: Icon(Icons.close, color: scheme.onSurfaceVariant),
                 tooltip: 'Dismiss',
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -75,7 +76,7 @@ class SaveConfirmationSheet extends ConsumerWidget {
               if (item == null) {
                 return Text(
                   'Link saved successfully.',
-                  style: theme.typeScale.bodyMedium.copyWith(
+                  style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 );
@@ -90,7 +91,7 @@ class SaveConfirmationSheet extends ConsumerWidget {
                       item.title!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.typeScale.bodyLarge.copyWith(
+                      style: (textTheme.bodyLarge ?? const TextStyle(fontSize: 15)).copyWith(
                         fontWeight: FontWeight.w600,
                         color: scheme.onSurface,
                       ),
@@ -100,7 +101,7 @@ class SaveConfirmationSheet extends ConsumerWidget {
                       item.url,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.typeScale.bodyMedium.copyWith(
+                      style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -114,8 +115,8 @@ class SaveConfirmationSheet extends ConsumerWidget {
                         const SizedBox(width: 14),
                         Text(
                           'Summarizing…',
-                          style: theme.typeScale.bodyMedium.copyWith(
-                            fontWeight: FontWeight.w500,
+                          style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
+                            fontWeight: FontWeight.w600,
                             color: scheme.primary,
                           ),
                         ),
@@ -129,15 +130,38 @@ class SaveConfirmationSheet extends ConsumerWidget {
                       children: [
                         if (item.category != null &&
                             item.category!.isNotEmpty) ...[
-                          M3EChip(
-                            label: item.category!,
-                            type: M3EChipType.assist,
-                            leading: const Icon(Icons.category_outlined),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.tertiaryContainer,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.category_outlined,
+                                  size: 15,
+                                  color: scheme.onTertiaryContainer,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  item.category!,
+                                  style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
+                                    color: scheme.onTertiaryContainer,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(width: 12),
                         ],
                         const Spacer(),
-                        M3EButton(
+                        FilledButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                             context.push('/detail/${item.id}');
@@ -161,7 +185,7 @@ class SaveConfirmationSheet extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             "Couldn't process — tap to retry",
-                            style: theme.typeScale.bodySmall.copyWith(
+                            style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
                               color: scheme.error,
                               fontWeight: FontWeight.w500,
                             ),
@@ -182,7 +206,7 @@ class SaveConfirmationSheet extends ConsumerWidget {
                           child: const Text('Retry'),
                         ),
                         const SizedBox(width: 8),
-                        M3EButton(
+                        FilledButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                             context.push('/detail/${item.id}');
@@ -201,8 +225,8 @@ class SaveConfirmationSheet extends ConsumerWidget {
                 const SizedBox(width: 14),
                 Text(
                   'Summarizing…',
-                  style: theme.typeScale.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w500,
+                  style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
+                    fontWeight: FontWeight.w600,
                     color: scheme.primary,
                   ),
                 ),
@@ -210,7 +234,7 @@ class SaveConfirmationSheet extends ConsumerWidget {
             ),
             error: (error, stack) => Text(
               'Link saved to your library.',
-              style: theme.typeScale.bodyMedium.copyWith(
+              style: (textTheme.bodyMedium ?? const TextStyle(fontSize: 13)).copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),

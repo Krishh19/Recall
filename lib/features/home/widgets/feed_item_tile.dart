@@ -36,7 +36,7 @@ class FeedItemTile extends ConsumerWidget {
     switch (platform.toLowerCase()) {
       case 'twitter':
       case 'x':
-        return Icons.tag;
+        return Icons.tag_rounded;
       case 'youtube':
         return Icons.play_arrow_rounded;
       case 'instagram':
@@ -51,29 +51,11 @@ class FeedItemTile extends ConsumerWidget {
     }
   }
 
-  Color _platformColor(String platform, M3EColorScheme scheme) {
-    switch (platform.toLowerCase()) {
-      case 'twitter':
-      case 'x':
-        return scheme.primary;
-      case 'youtube':
-        return scheme.error;
-      case 'instagram':
-        return scheme.tertiary;
-      case 'tiktok':
-        return Colors.pinkAccent;
-      case 'reddit':
-        return Colors.deepOrange;
-      case 'article':
-      default:
-        return scheme.secondary;
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = M3ETheme.of(context);
-    final scheme = theme.colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     String supportingText;
     if (item.isProcessing) {
@@ -85,7 +67,6 @@ class FeedItemTile extends ConsumerWidget {
     }
 
     final headline = item.title?.isNotEmpty == true ? item.title! : item.url;
-    final platformColor = _platformColor(item.platform, scheme);
 
     final tileWidget = GestureDetector(
       onLongPress: onLongPress,
@@ -106,13 +87,13 @@ class FeedItemTile extends ConsumerWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: platformColor.withAlpha(25),
+                      color: colorScheme.secondaryContainer,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       _platformIcon(item.platform),
-                      color: platformColor,
-                      size: 22,
+                      color: colorScheme.onSecondaryContainer,
+                      size: 20,
                     ),
                   ),
                   if (!item.isRead)
@@ -123,10 +104,10 @@ class FeedItemTile extends ConsumerWidget {
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          color: scheme.primary,
+                          color: colorScheme.primary,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: scheme.surface,
+                            color: colorScheme.surface,
                             width: 1.5,
                           ),
                         ),
@@ -138,10 +119,13 @@ class FeedItemTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (item.isProcessing)
-              const SizedBox(
+              SizedBox(
                 width: 16,
                 height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: colorScheme.primary,
+                ),
               )
             else if (item.isFailed)
               GestureDetector(
@@ -156,22 +140,22 @@ class FeedItemTile extends ConsumerWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: scheme.errorContainer,
-                    borderRadius: BorderRadius.circular(6),
+                    color: colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(100),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.lock_outline_rounded,
-                        size: 14,
-                        color: scheme.onErrorContainer,
+                        size: 13,
+                        color: colorScheme.onTertiaryContainer,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'Blocked',
-                        style: theme.typeScale.labelSmall.copyWith(
-                          color: scheme.onErrorContainer,
+                        style: (textTheme.labelSmall ?? const TextStyle(fontSize: 11)).copyWith(
+                          color: colorScheme.onTertiaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -180,10 +164,27 @@ class FeedItemTile extends ConsumerWidget {
                 ),
               )
             else if (item.category != null && item.category!.isNotEmpty)
-              M3EChip(label: item.category!, type: M3EChipType.assist),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: colorScheme.outlineVariant),
+                ),
+                child: Text(
+                  item.category!,
+                  style: (textTheme.labelSmall ?? const TextStyle(fontSize: 11)).copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             if (item.isFavorite) ...[
               const SizedBox(width: 6),
-              Icon(Icons.star_rounded, size: 18, color: scheme.primary),
+              Icon(Icons.star_rounded, size: 18, color: colorScheme.primary),
             ],
           ],
         ),
@@ -208,23 +209,23 @@ class FeedItemTile extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
         decoration: BoxDecoration(
-          color: scheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               item.isRead ? 'Mark Unread' : 'Archive',
-              style: theme.typeScale.labelLarge.copyWith(
-                color: scheme.onSecondaryContainer,
+              style: (textTheme.labelLarge ?? const TextStyle(fontSize: 13)).copyWith(
+                color: colorScheme.onSecondaryContainer,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: 8),
             Icon(
               item.isRead ? Icons.unarchive_outlined : Icons.archive_outlined,
-              color: scheme.onSecondaryContainer,
+              color: colorScheme.onSecondaryContainer,
             ),
           ],
         ),
