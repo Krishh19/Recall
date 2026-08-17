@@ -3,21 +3,21 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 
 /// Recall's shared Material 3 Expressive theme tokens and centralized style configurations.
 abstract final class AppTheme {
-  /// The brand purple seed used across light and dark themes.
-  static const Color seedColor = Color(0xFF6A4C93);
+  /// The brand seed color used as fallback when system dynamic color is unavailable.
+  static const Color seedColor = Color(0xFF6750A4);
 
-  /// Expressive light color scheme generated from the seed color.
+  /// Standard Material 3 light color scheme generated from the seed color.
   static final ColorScheme lightScheme = ColorScheme.fromSeed(
     seedColor: seedColor,
     brightness: Brightness.light,
-    dynamicSchemeVariant: DynamicSchemeVariant.expressive,
+    dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
   );
 
-  /// Expressive dark color scheme generated from the seed color.
+  /// Standard Material 3 dark color scheme generated from the seed color.
   static final ColorScheme darkScheme = ColorScheme.fromSeed(
     seedColor: seedColor,
     brightness: Brightness.dark,
-    dynamicSchemeVariant: DynamicSchemeVariant.expressive,
+    dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
   );
 
   /// Recall's explicit typography scale adhering to M3 Expressive guidelines.
@@ -100,9 +100,9 @@ abstract final class AppTheme {
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        elevation: 1,
-        backgroundColor: scheme.primary,
-        foregroundColor: scheme.onPrimary,
+        elevation: 2,
+        backgroundColor: scheme.primaryContainer,
+        foregroundColor: scheme.onPrimaryContainer,
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: scheme.surfaceContainerLow,
@@ -110,6 +110,16 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         elevation: 0,
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        textStyle: TextStyle(
+          color: scheme.onSurfaceVariant,
+          fontSize: 12,
+        ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -170,6 +180,14 @@ abstract final class AppTheme {
 
   /// Recall's dark Material 3 Expressive theme tokens.
   static final M3EThemeData dark = M3EThemeData.dark(seedColor: seedColor);
+
+  /// Creates light Material 3 Expressive theme tokens with a custom dynamic seed color.
+  static M3EThemeData lightWithSeed(Color seed) =>
+      M3EThemeData.light(seedColor: seed);
+
+  /// Creates dark Material 3 Expressive theme tokens with a custom dynamic seed color.
+  static M3EThemeData darkWithSeed(Color seed) =>
+      M3EThemeData.dark(seedColor: seed);
 
   /// Complete light [ThemeData].
   static final ThemeData lightTheme = buildThemeData(lightScheme);
