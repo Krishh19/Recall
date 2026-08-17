@@ -19,7 +19,7 @@
 ## ✨ Features
 
 - ⚡ **Seamless Share-to-Save**: Share links directly from Chrome, Twitter, YouTube, Instagram, Reddit, TikTok, or any Android/iOS app.
-- 🤖 **On-Device Gemini Summarization**: Powered by Google Gemini 2.5 Flash. Delivers a 2-sentence summary, bulleted key takeaways, estimated read time, and auto-generated tags.
+- 🤖 **Gemini-powered AI Summarization**: Powered by Google Gemini 2.5 Flash. Delivers a 2-sentence summary, bulleted key takeaways, estimated read time, and auto-generated tags.
 - 🛡️ **Anti-Hallucination Gate**: Detects login walls, bot blockers, and empty redirects to prevent AI hallucinations. Displays honest failure states instead of fake summaries.
 - ✍️ **Manual Caption Pasting**: Easily paste post captions or transcript excerpts to re-summarize JS-walled content on demand.
 - 🗂️ **Category & Filter Tabs**: Filter your library instantly by **All**, **Unread**, **Favorites**, **Blocked**, or topic categories (**Technology**, **Business**, **Health**, **Education**, **News**, etc.).
