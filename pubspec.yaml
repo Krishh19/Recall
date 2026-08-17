@@ -63,6 +63,7 @@ dev_dependencies:
   riverpod_generator: ^4.0.8
   drift_dev: ^2.34.5
   build_runner: ^2.16.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -77,6 +78,13 @@ flutter:
 
   assets:
     - assets/empty_states/
+    - assets/icon.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 21
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
