@@ -19,6 +19,7 @@
 ## ✨ Features
 
 - ⚡ **Seamless Share-to-Save**: Share links directly from Chrome, Twitter, YouTube, Instagram, Reddit, TikTok, or any Android/iOS app.
+- 🔑 **Bring Your Own Key (BYOK) Architecture**: 100% user-owned credentials. No hardcoded keys or middleman servers. Enter your personal Gemini key; it is validated live and saved strictly in your device's encrypted storage (`flutter_secure_storage`).
 - 🤖 **Gemini-powered AI Summarization**: Powered by Google Gemini 2.5 Flash. Delivers a 2-sentence summary, bulleted key takeaways, estimated read time, and auto-generated tags.
 - 🛡️ **Anti-Hallucination Gate**: Detects login walls, bot blockers, and empty redirects to prevent AI hallucinations. Displays honest failure states instead of fake summaries.
 - ✍️ **Manual Caption Pasting**: Easily paste post captions or transcript excerpts to re-summarize JS-walled content on demand.
@@ -28,7 +29,7 @@
 - 📤 **Markdown & JSON Export**: Export your entire library formatted for Obsidian, Notion, Bear, or raw JSON backup.
 - ⏰ **Weekly Digest Notifications**: Configurable local notifications reminding you of unread bookmarks saved during the week.
 - 🔒 **100% Private & Local**: Zero third-party tracker servers. All your bookmarks, extracted text, and AI summaries are stored in a local SQLite database (Drift).
-- 🎨 **Material 3 Expressive UI**: Adaptive themes (System, Light, Dark) utilizing the `material_3_expressive` design system.
+- 🎨 **Material 3 Expressive UI**: Adaptive themes (System, Light, Dark) with user-selectable color presets and dynamic wallpaper palettes (`material_3_expressive`).
 
 ---
 
@@ -50,9 +51,9 @@ graph TD
     
     I --> J{Anti-Hallucination Check}
     J -->|Blocked / Incomplete| K[status: failed + Honest Reason]
-    J -->|Substantive Content| L[Gemini 2.5 Flash REST API]
+    J -->|Substantive Content| L[Direct Gemini REST API]
     
-    L --> M[status: done + Summary, Key Takeaways, Category, Tags]
+    L -->|BYOK Key via Encrypted Storage| M[status: done + Summary, Key Takeaways, Category, Tags]
     
     G -->|watchItems Stream| N[Reactive UI: Home, Detail, Search, Settings]
 ```
@@ -79,11 +80,20 @@ graph TD
    flutter pub get
    ```
 
-3. **Configure your Gemini API Key**:
-   You can either configure your key in the **Settings** screen inside the app, or pass it at compile time:
+3. **Run the app**:
    ```bash
-   flutter run --dart-define=GEMINI_API_KEY=your_gemini_api_key_here
+   flutter run
    ```
+
+4. **Connect your Gemini API Key (BYOK)**:
+   - Open **Settings** $\rightarrow$ **AI Intelligence** $\rightarrow$ tap **Configure**.
+   - Paste your free API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+   - Recall performs a live verification ping against the Gemini API before securely storing the key on your device.
+
+*(Optional for CI/Automated Builds)*: You can also supply a default key at build time using `--dart-define`:
+```bash
+flutter run --dart-define=GEMINI_API_KEY=your_gemini_api_key_here
+```
 
 ---
 
