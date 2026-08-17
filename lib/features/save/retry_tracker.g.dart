@@ -44,7 +44,7 @@ final class RetryTrackerProvider
   }
 }
 
-String _$retryTrackerHash() => r'efad6ca2625921995707166f825919b40e769eef';
+String _$retryTrackerHash() => r'79ac67f69f4e1e51b1a58cc0ada5174778fea73c';
 
 /// Tracks consecutive failure retries per item ID.
 

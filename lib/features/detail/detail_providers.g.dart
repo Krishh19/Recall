@@ -67,7 +67,7 @@ final class ItemDetailProvider
   }
 }
 
-String _$itemDetailHash() => r'b4cb90227570cd4b0dfbd24507181b8a80d44394';
+String _$itemDetailHash() => r'64197a6bbc70f8c8190bd89ec607efc4f68c3895';
 
 /// Streams the real-time state of a specific [SavedItem] by its [id].
 

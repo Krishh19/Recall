@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:recall/core/providers/theme_controller.dart';
 
 /// Recall's shared Material 3 Expressive theme tokens and centralized style configurations.
 abstract final class AppTheme {
-  /// The brand seed color used as fallback when system dynamic color is unavailable.
-  static const Color seedColor = Color(0xFF6750A4);
+  /// The brand modern ocean blue seed used as default fallback.
+  static const Color seedColor = Color(0xFF2563EB);
 
-  /// Standard Material 3 light color scheme generated from the seed color.
+  /// Builds a [ColorScheme] for a given [preset] and [brightness].
+  static ColorScheme createScheme({
+    required ThemePreset preset,
+    required Brightness brightness,
+    ColorScheme? dynamicScheme,
+  }) {
+    if (preset == ThemePreset.dynamicColor && dynamicScheme != null) {
+      return dynamicScheme;
+    }
+    return ColorScheme.fromSeed(
+      seedColor: preset.color ?? seedColor,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
+    );
+  }
+
+  /// Standard Material 3 light color scheme generated from default seed.
   static final ColorScheme lightScheme = ColorScheme.fromSeed(
     seedColor: seedColor,
     brightness: Brightness.light,
     dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
   );
 
-  /// Standard Material 3 dark color scheme generated from the seed color.
+  /// Standard Material 3 dark color scheme generated from default seed.
   static final ColorScheme darkScheme = ColorScheme.fromSeed(
     seedColor: seedColor,
     brightness: Brightness.dark,
@@ -70,6 +87,8 @@ abstract final class AppTheme {
 
   /// Builds a cohesive [ThemeData] instance applying M3 Expressive shapes and components.
   static ThemeData buildThemeData(ColorScheme scheme) {
+    final isDark = scheme.brightness == Brightness.dark;
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
@@ -86,12 +105,18 @@ abstract final class AppTheme {
         centerTitle: false,
         titleTextStyle: textTheme.headlineSmall?.copyWith(
           color: scheme.onSurface,
+          fontWeight: FontWeight.bold,
         ),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
         color: scheme.surfaceContainer,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: isDark
+              ? BorderSide(color: scheme.outlineVariant.withAlpha(50), width: 1)
+              : BorderSide.none,
+        ),
         margin: const EdgeInsets.symmetric(vertical: 6),
       ),
       chipTheme: ChipThemeData(
@@ -101,8 +126,8 @@ abstract final class AppTheme {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         elevation: 2,
-        backgroundColor: scheme.primaryContainer,
-        foregroundColor: scheme.onPrimaryContainer,
+        backgroundColor: scheme.primary,
+        foregroundColor: scheme.onPrimary,
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: scheme.surfaceContainerLow,

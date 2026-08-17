@@ -123,7 +123,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final textTheme = theme.textTheme;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 8),
+      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 12),
       child: Row(
         children: [
           Icon(icon, size: 18, color: colorScheme.primary),
@@ -147,6 +147,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final scheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final currentThemeMode = ref.watch(themeControllerProvider);
+    final currentPreset = ref.watch(themePresetControllerProvider);
     final digestSettings = ref.watch(digestSettingsControllerProvider);
 
     return Scaffold(
@@ -218,6 +219,75 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       },
                     ),
                   ),
+                  const SizedBox(height: 18),
+                  Divider(color: scheme.outlineVariant, height: 1),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Theme Color Accent',
+                    style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Select dynamic wallpaper colors or a custom Material 3 accent.',
+                    style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: ThemePreset.values.map((p) {
+                      final isSelected = p == currentPreset;
+                      return FilterChip(
+                        selected: isSelected,
+                        showCheckmark: false,
+                        avatar: p == ThemePreset.dynamicColor
+                            ? Icon(
+                                Icons.auto_awesome,
+                                size: 16,
+                                color: isSelected
+                                    ? scheme.onSecondaryContainer
+                                    : scheme.onSurfaceVariant,
+                              )
+                            : Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: p.color,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                        label: Text(p.label),
+                        labelStyle: TextStyle(
+                          fontSize: 12,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected
+                              ? scheme.onSecondaryContainer
+                              : scheme.onSurfaceVariant,
+                        ),
+                        selectedColor: scheme.secondaryContainer,
+                        backgroundColor: scheme.surface,
+                        side: BorderSide(
+                          color: isSelected
+                              ? scheme.primary
+                              : scheme.outlineVariant,
+                          width: isSelected ? 1.5 : 1,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        onSelected: (_) {
+                          ref
+                              .read(themePresetControllerProvider.notifier)
+                              .setPreset(p);
+                        },
+                      );
+                    }).toList(),
+                  ),
                 ],
               ),
             ),
@@ -261,7 +331,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         decoration: BoxDecoration(
                           color: _hasSavedKey
                               ? scheme.primaryContainer
-                              : scheme.tertiaryContainer,
+                              : scheme.errorContainer,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Row(
@@ -274,7 +344,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               size: 13,
                               color: _hasSavedKey
                                   ? scheme.onPrimaryContainer
-                                  : scheme.onTertiaryContainer,
+                                  : scheme.onErrorContainer,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -282,7 +352,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               style: (textTheme.labelSmall ?? const TextStyle(fontSize: 11)).copyWith(
                                 color: _hasSavedKey
                                     ? scheme.onPrimaryContainer
-                                    : scheme.onTertiaryContainer,
+                                    : scheme.onErrorContainer,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

@@ -166,4 +166,4 @@ final class SavedItemsFeedProvider
   }
 }
 
-String _$savedItemsFeedHash() => r'4e85782b73460676bc8e6f578fc7f4a3d918702b';
+String _$savedItemsFeedHash() => r'd271b27446361e3a15574998a86fdb7ed6515796';

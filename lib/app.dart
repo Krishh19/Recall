@@ -18,22 +18,21 @@ class RecallApp extends ConsumerWidget {
     ref.watch(shareIntentServiceProvider);
 
     final ThemeMode themeMode = ref.watch(themeControllerProvider);
+    final ThemePreset preset = ref.watch(themePresetControllerProvider);
     final goRouter = ref.watch(routerProvider);
 
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        ColorScheme lightScheme;
-        ColorScheme darkScheme;
-
-        if (lightDynamic != null && darkDynamic != null) {
-          // Harmonize dynamic color schemes derived from user's wallpaper/system
-          lightScheme = lightDynamic.harmonized();
-          darkScheme = darkDynamic.harmonized();
-        } else {
-          // Standard Material 3 balanced fallback
-          lightScheme = AppTheme.lightScheme;
-          darkScheme = AppTheme.darkScheme;
-        }
+        final lightScheme = AppTheme.createScheme(
+          preset: preset,
+          brightness: Brightness.light,
+          dynamicScheme: lightDynamic?.harmonized(),
+        );
+        final darkScheme = AppTheme.createScheme(
+          preset: preset,
+          brightness: Brightness.dark,
+          dynamicScheme: darkDynamic?.harmonized(),
+        );
 
         final lightTheme = AppTheme.buildThemeData(lightScheme);
         final darkTheme = AppTheme.buildThemeData(darkScheme);
@@ -56,7 +55,7 @@ class RecallApp extends ConsumerWidget {
                   ? AppTheme.darkWithSeed(activeScheme.primary)
                   : AppTheme.lightWithSeed(activeScheme.primary),
               autoTheming: themeMode == ThemeMode.system,
-              dynamicColoring: true,
+              dynamicColoring: preset == ThemePreset.dynamicColor,
               initialTheme: switch (themeMode) {
                 ThemeMode.system => null,
                 ThemeMode.light => Brightness.light,
