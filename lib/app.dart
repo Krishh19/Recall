@@ -45,22 +45,20 @@ class RecallApp extends ConsumerWidget {
           debugShowCheckedModeBanner: false,
           routerConfig: goRouter,
           builder: (context, child) {
-            final isDark = themeMode == ThemeMode.dark ||
+            // M3ETheme projects its token colors back onto Theme.of(context).
+            // Giving it its own adaptive/dynamic configuration would therefore
+            // create a second, independently-resolved color scheme on top of
+            // MaterialApp's scheme. Keep one source of truth: the fully
+            // resolved ColorScheme above, including its separate dark palette.
+            final isDark =
+                themeMode == ThemeMode.dark ||
                 (themeMode == ThemeMode.system &&
-                    MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-            final activeScheme = isDark ? darkScheme : lightScheme;
+                    MediaQuery.platformBrightnessOf(context) ==
+                        Brightness.dark);
+            final activeTheme = isDark ? darkTheme : lightTheme;
 
             return M3ETheme(
-              data: isDark
-                  ? AppTheme.darkWithSeed(activeScheme.primary)
-                  : AppTheme.lightWithSeed(activeScheme.primary),
-              autoTheming: themeMode == ThemeMode.system,
-              dynamicColoring: preset == ThemePreset.dynamicColor,
-              initialTheme: switch (themeMode) {
-                ThemeMode.system => null,
-                ThemeMode.light => Brightness.light,
-                ThemeMode.dark => Brightness.dark,
-              },
+              data: M3EThemeData.fromMaterial(activeTheme),
               child: child ?? const SizedBox.shrink(),
             );
           },

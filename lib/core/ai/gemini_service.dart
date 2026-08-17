@@ -130,6 +130,87 @@ CRITICAL ANTI-HALLUCINATION RULES:
     }
   }
 
+  /// Tests a candidate API key against the Gemini API without saving it.
+  /// Throws user-friendly [GeminiValidationException] on failure.
+  Future<void> validateApiKey(String candidateKey) async {
+    final key = candidateKey.trim();
+    if (key.isEmpty) {
+      throw const GeminiValidationException('Please enter a valid API key.');
+    }
+
+    final url =
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$key';
+
+    final payload = {
+      'contents': [
+        {
+          'parts': [
+            {'text': 'ping'},
+          ],
+        },
+      ],
+      'generationConfig': {
+        'maxOutputTokens': 1,
+      },
+    };
+
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        url,
+        data: payload,
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (status) => status != null,
+          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      }
+
+      if (response.statusCode == 400 ||
+          response.statusCode == 401 ||
+          response.statusCode == 403) {
+        throw const GeminiValidationException(
+          'This API key was rejected by Gemini. Check that the key is correct and has Gemini API access enabled.',
+        );
+      } else if (response.statusCode == 429) {
+        throw const GeminiValidationException(
+          'Gemini temporarily rejected the request because of a usage limit. Try again later.',
+        );
+      } else {
+        throw GeminiValidationException(
+          'Gemini returned status ${response.statusCode}. Check the key and try again.',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        throw const GeminiValidationException(
+          "Couldn't reach Gemini. Check your internet connection and try again.",
+        );
+      }
+      if (e.response?.statusCode == 400 ||
+          e.response?.statusCode == 401 ||
+          e.response?.statusCode == 403) {
+        throw const GeminiValidationException(
+          'This API key was rejected by Gemini. Check that the key is correct and has access to the Gemini API.',
+        );
+      }
+      throw const GeminiValidationException(
+        "Couldn't verify the API key. Please check the key and try again.",
+      );
+    } catch (e) {
+      if (e is GeminiValidationException) rethrow;
+      throw const GeminiValidationException(
+        "Couldn't verify the API key. Please try again.",
+      );
+    }
+  }
+
   /// Calls Google Gemini (`gemini-2.5-flash`) to generate structured summaries and tags.
   Future<AISummaryResult> summarize({
     required String title,
@@ -203,8 +284,27 @@ CRITICAL ANTI-HALLUCINATION RULES:
   }
 }
 
+/// Thrown when candidate Gemini API key validation fails.
+class GeminiValidationException implements Exception {
+  /// Creates a [GeminiValidationException].
+  const GeminiValidationException(this.message);
+
+  /// User-friendly explanation.
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// Provides the active [GeminiService] instance.
 @Riverpod(keepAlive: true)
 GeminiService geminiService(Ref ref) {
   return GeminiService();
+}
+
+/// Exposes whether a Gemini API key is currently configured.
+@riverpod
+Future<bool> isGeminiConfigured(Ref ref) async {
+  final gemini = ref.watch(geminiServiceProvider);
+  return gemini.hasApiKey();
 }

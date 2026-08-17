@@ -53,3 +53,42 @@ final class GeminiServiceProvider
 }
 
 String _$geminiServiceHash() => r'e5feb19f16ed3b98580dffdb3a321139b26a7d6d';
+
+/// Exposes whether a Gemini API key is currently configured.
+
+@ProviderFor(isGeminiConfigured)
+final isGeminiConfiguredProvider = IsGeminiConfiguredProvider._();
+
+/// Exposes whether a Gemini API key is currently configured.
+
+final class IsGeminiConfiguredProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Exposes whether a Gemini API key is currently configured.
+  IsGeminiConfiguredProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isGeminiConfiguredProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isGeminiConfiguredHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    return isGeminiConfigured(ref);
+  }
+}
+
+String _$isGeminiConfiguredHash() =>
+    r'880076c81c2d907427c4f070d95e7f28b24b57ef';

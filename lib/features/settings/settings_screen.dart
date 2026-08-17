@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:recall/core/ai/gemini_service.dart';
@@ -9,7 +8,7 @@ import 'package:recall/core/utils/export_service.dart';
 import 'package:recall/data/repositories/saved_item_repository.dart';
 import 'package:recall/features/settings/digest_settings.dart';
 import 'package:recall/features/settings/digest_settings_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:recall/features/settings/widgets/gemini_config_sheet.dart';
 
 /// Settings screen allowing full customization of theme, AI API key, digest notifications, and exports.
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -21,81 +20,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  late final TextEditingController _apiKeyController;
-  bool _obscureApiKey = true;
-  bool _hasSavedKey = false;
-  bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _apiKeyController = TextEditingController();
-    _loadApiKey();
-  }
-
-  Future<void> _loadApiKey() async {
-    final gemini = ref.read(geminiServiceProvider);
-    final key = await gemini.getApiKey();
-    if (mounted) {
-      setState(() {
-        _apiKeyController.text = key;
-        _hasSavedKey = key.isNotEmpty;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _apiKeyController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _saveApiKey() async {
-    setState(() => _isSaving = true);
-    final newKey = _apiKeyController.text.trim();
-    final gemini = ref.read(geminiServiceProvider);
-    await gemini.setApiKey(newKey);
-    if (mounted) {
-      setState(() {
-        _hasSavedKey = newKey.isNotEmpty;
-        _isSaving = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            newKey.isNotEmpty
-                ? 'Gemini API key saved successfully!'
-                : 'Gemini API key cleared.',
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Future<void> _pasteFromClipboard() async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null && data.text != null && data.text!.trim().isNotEmpty) {
-      setState(() {
-        _apiKeyController.text = data.text!.trim();
-      });
-      await _saveApiKey();
-    }
-  }
-
-  Future<void> _openGoogleAIStudio() async {
-    final uri = Uri.parse('https://aistudio.google.com/app/apikey');
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open browser.')),
-        );
-      }
-    }
-  }
-
   Future<void> _rescheduleDigest({
     required bool enabled,
     required int dayOfWeek,
@@ -149,6 +73,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currentThemeMode = ref.watch(themeControllerProvider);
     final currentPreset = ref.watch(themePresetControllerProvider);
     final digestSettings = ref.watch(digestSettingsControllerProvider);
+    final isGeminiConfiguredAsync = ref.watch(isGeminiConfiguredProvider);
+    final isGeminiConfigured = isGeminiConfiguredAsync.value ?? false;
 
     return Scaffold(
       appBar: M3EAppBar.top(
@@ -295,7 +221,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           const SizedBox(height: 24),
 
-          // ─── Section 2: AI Intelligence ───
+          // ─── Section 2: AI Intelligence (BYOK Status Card) ───
           _buildSectionHeader('AI Intelligence', Icons.auto_awesome, theme),
           Card(
             color: scheme.surfaceContainer,
@@ -311,12 +237,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.key_outlined, size: 20, color: scheme.primary),
+                      Icon(
+                        Icons.key_rounded,
+                        size: 20,
+                        color: isGeminiConfigured
+                            ? scheme.primary
+                            : scheme.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Google Gemini 2.5 Flash',
-                          style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
+                          'Google Gemini',
+                          style: (textTheme.titleMedium ??
+                                  const TextStyle(fontSize: 15))
+                              .copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -329,30 +263,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: _hasSavedKey
+                          color: isGeminiConfigured
                               ? scheme.primaryContainer
-                              : scheme.errorContainer,
+                              : scheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              _hasSavedKey
+                              isGeminiConfigured
                                   ? Icons.check_circle_rounded
                                   : Icons.info_outline_rounded,
                               size: 13,
-                              color: _hasSavedKey
+                              color: isGeminiConfigured
                                   ? scheme.onPrimaryContainer
-                                  : scheme.onErrorContainer,
+                                  : scheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              _hasSavedKey ? 'Configured' : 'Needs Key',
-                              style: (textTheme.labelSmall ?? const TextStyle(fontSize: 11)).copyWith(
-                                color: _hasSavedKey
+                              isGeminiConfigured
+                                  ? 'Connected'
+                                  : 'Not configured',
+                              style: (textTheme.labelSmall ??
+                                      const TextStyle(fontSize: 11))
+                                  .copyWith(
+                                color: isGeminiConfigured
                                     ? scheme.onPrimaryContainer
-                                    : scheme.onErrorContainer,
+                                    : scheme.onSurfaceVariant,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -361,140 +299,90 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Summaries, key takeaways, categories, and tags are generated directly using your Gemini API key.',
-                    style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _apiKeyController,
-                    obscureText: _obscureApiKey,
-                    onChanged: (_) {
-                      setState(() {});
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'Gemini API Key',
-                      hintText: 'Enter your AI Studio API key',
-                      filled: true,
-                      fillColor: scheme.surfaceContainerLowest,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: scheme.outlineVariant),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: scheme.outlineVariant),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: scheme.primary, width: 1.5),
-                      ),
-                      suffixIcon: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              _obscureApiKey
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                              size: 20,
-                              color: scheme.onSurfaceVariant,
-                            ),
-                            tooltip: _obscureApiKey ? 'Show key' : 'Hide key',
-                            onPressed: () {
-                              setState(() => _obscureApiKey = !_obscureApiKey);
-                            },
-                          ),
-                          if (_apiKeyController.text.isNotEmpty)
-                            IconButton(
-                              icon: Icon(
-                                Icons.clear_rounded,
-                                size: 20,
-                                color: scheme.onSurfaceVariant,
-                              ),
-                              tooltip: 'Clear',
-                              onPressed: () {
-                                setState(() => _apiKeyController.clear());
-                                _saveApiKey();
-                              },
-                            )
-                          else
-                            IconButton(
-                              icon: Icon(
-                                Icons.content_paste_rounded,
-                                size: 20,
-                                color: scheme.onSurfaceVariant,
-                              ),
-                              tooltip: 'Paste from clipboard',
-                              onPressed: _pasteFromClipboard,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 8),
                   Text(
-                    'Your key stays on this device — used only to call Gemini directly.',
-                    style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
+                    isGeminiConfigured
+                        ? 'Summaries, key takeaways, categories, and tags are generated using your Gemini API key.'
+                        : 'Add your Gemini API key to enable AI-powered summaries, categories, and tags.',
+                    style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12))
+                        .copyWith(
                       color: scheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
+                      height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: _openGoogleAIStudio,
-                        borderRadius: BorderRadius.circular(6),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 4,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Get free API key',
-                                style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
-                                  color: scheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
+                  const SizedBox(height: 14),
+                  if (isGeminiConfigured) ...[
+                    Divider(color: scheme.outlineVariant, height: 1),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () => GeminiConfigSheet.show(
+                        context,
+                        isConfigured: true,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.lock_rounded,
+                              size: 18,
+                              color: scheme.primary,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'API key',
+                                    style: (textTheme.titleSmall ??
+                                            const TextStyle(fontSize: 14))
+                                        .copyWith(fontWeight: FontWeight.w600),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Stored securely on this device',
+                                    style: (textTheme.bodySmall ??
+                                            const TextStyle(fontSize: 12))
+                                        .copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.open_in_new_rounded,
-                                size: 13,
-                                color: scheme.primary,
-                              ),
-                            ],
+                            ),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: scheme.onSurfaceVariant,
+                              size: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () => GeminiConfigSheet.show(
+                          context,
+                          isConfigured: false,
+                        ),
+                        icon: const Icon(Icons.add_rounded, size: 18),
+                        label: const Text('Configure'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                       ),
-                      const Spacer(),
-                      FilledButton(
-                        onPressed: _isSaving ? null : _saveApiKey,
-                        child: _isSaving
-                            ? SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: scheme.onPrimary,
-                                ),
-                              )
-                            : const Text('Save Key'),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ],
               ),
             ),

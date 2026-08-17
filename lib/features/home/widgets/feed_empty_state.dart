@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:recall/features/save/widgets/manual_add_url_dialog.dart';
 
 /// Empty state widget displaying tailored illustrations for feed filter states.

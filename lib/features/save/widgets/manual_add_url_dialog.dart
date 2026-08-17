@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:recall/core/utils/url_extractor.dart';
 import 'package:recall/data/repositories/saved_item_repository.dart';
 import 'package:recall/features/save/widgets/save_confirmation_sheet.dart';

@@ -430,7 +430,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 data: (items) {
                   if (items.isEmpty) {
                     return FeedEmptyState(
-                      key: ValueKey('empty_${selectedCategory}'),
+                      key: ValueKey('empty_$selectedCategory'),
                       selectedCategory: selectedCategory,
                       onResetFilter: selectedCategory != 'All'
                           ? () {
