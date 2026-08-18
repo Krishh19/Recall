@@ -422,103 +422,96 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const CategoryFilterRow(),
           const SizedBox(height: 8),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: feedAsync.when(
-                data: (items) {
-                  if (items.isEmpty) {
-                    return FeedEmptyState(
-                      key: ValueKey('empty_$selectedCategory'),
-                      selectedCategory: selectedCategory,
-                      onResetFilter: selectedCategory != 'All'
-                          ? () {
-                              ref
-                                  .read(selectedCategoryProvider.notifier)
-                                  .selectCategory('All');
-                              ref
-                                  .read(unreadOnlyFilterProvider.notifier)
-                                  .setUnreadOnly(false);
-                            }
-                          : null,
-                    );
-                  }
-
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      ref.invalidate(savedItemsFeedProvider);
-                    },
-                    child: ListView.separated(
-                      key: ValueKey('feed_${selectedCategory}_${items.length}'),
-                      padding: const EdgeInsets.only(
-                        left: 16,
-                        right: 16,
-                        top: 8,
-                        bottom: 88, // 88px bottom padding to prevent FAB overlap
-                      ),
-                      itemCount: items.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        final isSelected = _selectedIds.contains(item.id);
-
-                        return FeedItemTile(
-                          item: item,
-                          selected: isSelected,
-                          selectionMode: _isSelectionMode,
-                          onTap: () {
-                            if (_isSelectionMode) {
-                              _toggleSelection(item.id);
-                            } else {
-                              context.push('/detail/${item.id}');
-                            }
-                          },
-                          onLongPress: () {
-                            if (!_isSelectionMode) {
-                              setState(() {
-                                _isSelectionMode = true;
-                                _selectedIds.add(item.id);
-                              });
-                            }
-                          },
-                        );
-                      },
-                    ),
+            child: feedAsync.when(
+              data: (items) {
+                if (items.isEmpty) {
+                  return FeedEmptyState(
+                    selectedCategory: selectedCategory,
+                    onResetFilter: selectedCategory != 'All'
+                        ? () {
+                            ref
+                                .read(selectedCategoryProvider.notifier)
+                                .selectCategory('All');
+                            ref
+                                .read(unreadOnlyFilterProvider.notifier)
+                                .setUnreadOnly(false);
+                          }
+                        : null,
                   );
-                },
-                loading: () => Center(
-                  child: CircularProgressIndicator(color: scheme.primary),
-                ),
-                error: (error, stack) => Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 48, color: scheme.error),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Failed to load saved items',
-                          style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          error.toString(),
-                          style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        FilledButton(
-                          onPressed: () => ref.invalidate(savedItemsFeedProvider),
-                          child: const Text('Retry'),
-                        ),
-                      ],
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(savedItemsFeedProvider);
+                  },
+                  child: ListView.separated(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 8,
+                      bottom: 88, // 88px bottom padding to prevent FAB overlap
                     ),
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final isSelected = _selectedIds.contains(item.id);
+
+                      return FeedItemTile(
+                        item: item,
+                        selected: isSelected,
+                        selectionMode: _isSelectionMode,
+                        onTap: () {
+                          if (_isSelectionMode) {
+                            _toggleSelection(item.id);
+                          } else {
+                            context.push('/detail/${item.id}');
+                          }
+                        },
+                        onLongPress: () {
+                          if (!_isSelectionMode) {
+                            setState(() {
+                              _isSelectionMode = true;
+                              _selectedIds.add(item.id);
+                            });
+                          }
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+              loading: () => Center(
+                child: CircularProgressIndicator(color: scheme.primary),
+              ),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 48, color: scheme.error),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Failed to load saved items',
+                        style: (textTheme.titleMedium ?? const TextStyle(fontSize: 15)).copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        error.toString(),
+                        style: (textTheme.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: () => ref.invalidate(savedItemsFeedProvider),
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
                 ),
               ),
