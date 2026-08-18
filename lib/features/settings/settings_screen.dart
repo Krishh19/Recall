@@ -170,20 +170,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       return FilterChip(
                         selected: isSelected,
                         showCheckmark: false,
+                        avatarBoxConstraints: const BoxConstraints(
+                          minWidth: 16,
+                          maxWidth: 16,
+                          minHeight: 16,
+                          maxHeight: 16,
+                        ),
                         avatar: p == ThemePreset.dynamicColor
                             ? Icon(
                                 Icons.auto_awesome,
-                                size: 16,
+                                size: 14,
                                 color: isSelected
                                     ? scheme.onSecondaryContainer
                                     : scheme.onSurfaceVariant,
                               )
-                            : Container(
-                                width: 14,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: p.color,
-                                  shape: BoxShape.circle,
+                            : Center(
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: p.color,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
                               ),
                         label: Text(p.label),
