@@ -17,11 +17,25 @@ class CategoryFilterRow extends ConsumerWidget {
 
     return SizedBox(
       height: 48,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        itemCount: recallCategories.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            stops: [0.0, 0.90, 1.0],
+            colors: [
+              Colors.black,
+              Colors.black,
+              Colors.transparent,
+            ],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          itemCount: recallCategories.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final category = recallCategories[index];
           final isSelected = category == selectedCategory;
@@ -74,6 +88,7 @@ class CategoryFilterRow extends ConsumerWidget {
             },
           );
         },
+      ),
       ),
     );
   }

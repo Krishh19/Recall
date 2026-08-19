@@ -51,6 +51,25 @@ class FeedItemTile extends ConsumerWidget {
     }
   }
 
+  ({Color bg, Color fg}) _categoryColors(ColorScheme scheme, String? category) {
+    switch (category?.toLowerCase()) {
+      case 'technology':
+        return (bg: scheme.primaryContainer, fg: scheme.onPrimaryContainer);
+      case 'finance':
+      case 'business':
+        return (bg: scheme.secondaryContainer, fg: scheme.onSecondaryContainer);
+      case 'entertainment':
+      case 'food':
+      case 'news':
+        return (bg: scheme.tertiaryContainer, fg: scheme.onTertiaryContainer);
+      case 'health':
+      case 'education':
+        return (bg: scheme.surfaceContainerHigh, fg: scheme.onSurfaceVariant);
+      default:
+        return (bg: scheme.surfaceContainerLow, fg: scheme.onSurfaceVariant);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -164,23 +183,30 @@ class FeedItemTile extends ConsumerWidget {
                 ),
               )
             else if (item.category != null && item.category!.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: colorScheme.outlineVariant),
-                ),
-                child: Text(
-                  item.category!,
-                  style: (textTheme.labelSmall ?? const TextStyle(fontSize: 11)).copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+              Builder(
+                builder: (context) {
+                  final catColors =
+                      _categoryColors(colorScheme, item.category);
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: catColors.bg,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      item.category!,
+                      style: (textTheme.labelSmall ??
+                              const TextStyle(fontSize: 11))
+                          .copyWith(
+                        color: catColors.fg,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  );
+                },
               ),
             if (item.isFavorite) ...[
               const SizedBox(width: 6),
