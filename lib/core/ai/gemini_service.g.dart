@@ -92,3 +92,41 @@ final class IsGeminiConfiguredProvider
 
 String _$isGeminiConfiguredHash() =>
     r'880076c81c2d907427c4f070d95e7f28b24b57ef';
+
+/// Exposes the safe masked Gemini API key (e.g. AIza••••••••••••) if configured.
+
+@ProviderFor(maskedGeminiKey)
+final maskedGeminiKeyProvider = MaskedGeminiKeyProvider._();
+
+/// Exposes the safe masked Gemini API key (e.g. AIza••••••••••••) if configured.
+
+final class MaskedGeminiKeyProvider
+    extends $FunctionalProvider<AsyncValue<String>, String, FutureOr<String>>
+    with $FutureModifier<String>, $FutureProvider<String> {
+  /// Exposes the safe masked Gemini API key (e.g. AIza••••••••••••) if configured.
+  MaskedGeminiKeyProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'maskedGeminiKeyProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$maskedGeminiKeyHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<String> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String> create(Ref ref) {
+    return maskedGeminiKey(ref);
+  }
+}
+
+String _$maskedGeminiKeyHash() => r'0b04710cb53ed453be3537b6b6efcb59933d4858';

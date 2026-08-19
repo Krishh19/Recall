@@ -130,12 +130,25 @@ CRITICAL ANTI-HALLUCINATION RULES:
     }
   }
 
+  /// Returns a safe, masked representation of the active API key (e.g. `AIza••••••••••••`).
+  /// Never exposes the full raw key.
+  Future<String> getMaskedKey() async {
+    final key = await getApiKey();
+    if (key.isEmpty) return '';
+    if (key.length <= 6) return '••••••';
+    final prefix = key.substring(0, 4);
+    return '$prefix••••••••••••';
+  }
+
   /// Tests a candidate API key against the Gemini API without saving it.
   /// Throws user-friendly [GeminiValidationException] on failure.
   Future<void> validateApiKey(String candidateKey) async {
     final key = candidateKey.trim();
     if (key.isEmpty) {
-      throw const GeminiValidationException('Please enter a valid API key.');
+      throw const GeminiValidationException(
+        'Please enter a valid API key.',
+        category: GeminiValidationCategory.invalidKey,
+      );
     }
 
     final url =
@@ -170,43 +183,77 @@ CRITICAL ANTI-HALLUCINATION RULES:
         return;
       }
 
-      if (response.statusCode == 400 ||
-          response.statusCode == 401 ||
-          response.statusCode == 403) {
+      if (response.statusCode == 429) {
         throw const GeminiValidationException(
-          'This API key was rejected by Gemini. Check that the key is correct and has Gemini API access enabled.',
+          'Your key is valid, but Gemini isn\'t currently allowing this request. Check your Google AI Studio project, API access, or usage limits.',
+          category: GeminiValidationCategory.quotaOrPermission,
         );
-      } else if (response.statusCode == 429) {
+      } else if (response.statusCode == 403) {
+        final data = response.data;
+        String errorMsg = '';
+        if (data != null) {
+          final errorObj = data['error'];
+          if (errorObj is Map) {
+            errorMsg = errorObj['message']?.toString() ?? '';
+          }
+        }
+        if (errorMsg.contains('PERMISSION_DENIED') ||
+            errorMsg.contains('RESOURCE_EXHAUSTED') ||
+            errorMsg.contains('quota') ||
+            errorMsg.contains('billing')) {
+          throw const GeminiValidationException(
+            'Your key is valid, but Gemini isn\'t currently allowing this request. Check your Google AI Studio project, API access, or usage limits.',
+            category: GeminiValidationCategory.quotaOrPermission,
+          );
+        }
         throw const GeminiValidationException(
-          'Gemini temporarily rejected the request because of a usage limit. Try again later.',
+          'We couldn\'t verify this API key. Check that you copied the complete key and try again.',
+          category: GeminiValidationCategory.invalidKey,
+        );
+      } else if (response.statusCode == 400 || response.statusCode == 401) {
+        throw const GeminiValidationException(
+          'We couldn\'t verify this API key. Check that you copied the complete key and try again.',
+          category: GeminiValidationCategory.invalidKey,
         );
       } else {
         throw GeminiValidationException(
           'Gemini returned status ${response.statusCode}. Check the key and try again.',
+          category: GeminiValidationCategory.invalidKey,
         );
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
           e.type == DioExceptionType.connectionError) {
         throw const GeminiValidationException(
-          "Couldn't reach Gemini. Check your internet connection and try again.",
+          'Couldn\'t reach Gemini. Check your internet connection and try again.',
+          category: GeminiValidationCategory.networkError,
+        );
+      }
+      if (e.response?.statusCode == 429) {
+        throw const GeminiValidationException(
+          'Your key is valid, but Gemini isn\'t currently allowing this request. Check your Google AI Studio project, API access, or usage limits.',
+          category: GeminiValidationCategory.quotaOrPermission,
         );
       }
       if (e.response?.statusCode == 400 ||
           e.response?.statusCode == 401 ||
           e.response?.statusCode == 403) {
         throw const GeminiValidationException(
-          'This API key was rejected by Gemini. Check that the key is correct and has access to the Gemini API.',
+          'We couldn\'t verify this API key. Check that you copied the complete key and try again.',
+          category: GeminiValidationCategory.invalidKey,
         );
       }
       throw const GeminiValidationException(
-        "Couldn't verify the API key. Please check the key and try again.",
+        'Couldn\'t reach Gemini. Check your internet connection and try again.',
+        category: GeminiValidationCategory.networkError,
       );
     } catch (e) {
       if (e is GeminiValidationException) rethrow;
       throw const GeminiValidationException(
-        "Couldn't verify the API key. Please try again.",
+        'Couldn\'t verify the API key. Please try again.',
+        category: GeminiValidationCategory.invalidKey,
       );
     }
   }
@@ -284,13 +331,31 @@ CRITICAL ANTI-HALLUCINATION RULES:
   }
 }
 
+/// Categorized outcome for candidate Gemini API key verification.
+enum GeminiValidationCategory {
+  /// The key was rejected by Gemini (HTTP 400, 401, 403 invalid key).
+  invalidKey,
+
+  /// Network error or unreachable endpoint.
+  networkError,
+
+  /// Valid key format/project but quota exhausted or permissions restricted.
+  quotaOrPermission,
+}
+
 /// Thrown when candidate Gemini API key validation fails.
 class GeminiValidationException implements Exception {
   /// Creates a [GeminiValidationException].
-  const GeminiValidationException(this.message);
+  const GeminiValidationException(
+    this.message, {
+    this.category = GeminiValidationCategory.invalidKey,
+  });
 
   /// User-friendly explanation.
   final String message;
+
+  /// The root failure classification.
+  final GeminiValidationCategory category;
 
   @override
   String toString() => message;
@@ -307,4 +372,11 @@ GeminiService geminiService(Ref ref) {
 Future<bool> isGeminiConfigured(Ref ref) async {
   final gemini = ref.watch(geminiServiceProvider);
   return gemini.hasApiKey();
+}
+
+/// Exposes the safe masked Gemini API key (e.g. AIza••••••••••••) if configured.
+@riverpod
+Future<String> maskedGeminiKey(Ref ref) async {
+  final gemini = ref.watch(geminiServiceProvider);
+  return gemini.getMaskedKey();
 }

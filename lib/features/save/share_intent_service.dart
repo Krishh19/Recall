@@ -10,7 +10,7 @@ import 'package:recall/data/repositories/saved_item_repository.dart';
 part 'share_intent_service.g.dart';
 
 /// Holds the most recently shared and persisted [SavedItem], if any.
-@riverpod
+@Riverpod(keepAlive: true)
 class LatestSharedItem extends _$LatestSharedItem {
   @override
   SavedItem? build() => null;
@@ -67,7 +67,7 @@ class ShareIntentService {
   }
 
   /// Processes a list of incoming [SharedMediaFile]s, extracts the web link,
-  /// and saves it asynchronously to Supabase.
+  /// and saves it asynchronously to local storage.
   Future<SavedItem?> handleSharedMedia(List<SharedMediaFile> mediaFiles) async {
     if (mediaFiles.isEmpty) return null;
 

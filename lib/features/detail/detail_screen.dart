@@ -4,9 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:recall/core/ai/gemini_service.dart';
 import 'package:recall/data/models/saved_item.dart';
 import 'package:recall/data/repositories/saved_item_repository.dart';
 import 'package:recall/features/detail/detail_providers.dart';
+import 'package:recall/features/onboarding/widgets/ai_gate_prompt.dart';
 import 'package:recall/features/save/retry_tracker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -333,6 +335,8 @@ class DetailScreen extends ConsumerWidget {
     final scheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final itemAsync = ref.watch(itemDetailProvider(id));
+    final isGeminiConfigured =
+        ref.watch(isGeminiConfiguredProvider).value ?? false;
 
     return itemAsync.when(
       data: (item) {
@@ -617,6 +621,22 @@ class DetailScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
+
+                // Unconfigured Gemini Inline Prompt
+                if (!isGeminiConfigured &&
+                    (item.summary == null ||
+                        item.summary!.isEmpty ||
+                        item.isFailed)) ...[
+                  AIGatePrompt(
+                    onConfigured: () {
+                      ref.invalidate(isGeminiConfiguredProvider);
+                      ref
+                          .read(savedItemRepositoryProvider)
+                          .retryItem(item);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
 
                 // Processing Status Banner
                 if (item.isProcessing) ...[

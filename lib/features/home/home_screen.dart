@@ -333,11 +333,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             tooltip: 'Export Library',
             onPressed: () => _showExportSheet(context, currentItems),
           ),
-          IconButton(
-            icon: Icon(Icons.settings_outlined, color: scheme.onSurfaceVariant),
-            tooltip: 'Settings',
-            onPressed: () => context.push('/settings'),
-          ),
         ],
         suggestionsBuilder: (context, controller) {
           final query = controller.text.toLowerCase();
