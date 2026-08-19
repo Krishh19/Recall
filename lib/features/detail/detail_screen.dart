@@ -314,6 +314,25 @@ class DetailScreen extends ConsumerWidget {
     }
   }
 
+  ({Color bg, Color fg}) _categoryColors(ColorScheme scheme, String? category) {
+    switch (category?.toLowerCase()) {
+      case 'technology':
+        return (bg: scheme.primaryContainer, fg: scheme.onPrimaryContainer);
+      case 'finance':
+      case 'business':
+        return (bg: scheme.secondaryContainer, fg: scheme.onSecondaryContainer);
+      case 'entertainment':
+      case 'food':
+      case 'news':
+        return (bg: scheme.tertiaryContainer, fg: scheme.onTertiaryContainer);
+      case 'health':
+      case 'education':
+        return (bg: scheme.surfaceContainerHigh, fg: scheme.onSurfaceVariant);
+      default:
+        return (bg: scheme.tertiaryContainer, fg: scheme.onTertiaryContainer);
+    }
+  }
+
   String _formatReadingTime(SavedItem item) {
     final fullText = '${item.title ?? ''} ${item.summary ?? ''} ${item.rawContent ?? ''}';
     final words = fullText.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
@@ -509,40 +528,47 @@ class DetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Metadata Row: Category & Reading Time & Date & Tags
+                // Metadata Row: Category & Reading Time & Date
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     if (item.category != null && item.category!.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: scheme.tertiaryContainer,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.category_outlined,
-                              size: 15,
-                              color: scheme.onTertiaryContainer,
+                      Builder(
+                        builder: (context) {
+                          final colors = _categoryColors(scheme, item.category);
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              item.category!,
-                              style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
-                                color: scheme.onTertiaryContainer,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            decoration: BoxDecoration(
+                              color: colors.bg,
+                              borderRadius: BorderRadius.circular(100),
                             ),
-                          ],
-                        ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.category_outlined,
+                                  size: 15,
+                                  color: colors.fg,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  item.category!,
+                                  style: (textTheme.labelMedium ??
+                                          const TextStyle(fontSize: 12))
+                                      .copyWith(
+                                    color: colors.fg,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -564,7 +590,9 @@ class DetailScreen extends ConsumerWidget {
                           const SizedBox(width: 5),
                           Text(
                             readingTime,
-                            style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
+                            style: (textTheme.labelMedium ??
+                                    const TextStyle(fontSize: 12))
+                                .copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
@@ -591,35 +619,50 @@ class DetailScreen extends ConsumerWidget {
                           const SizedBox(width: 5),
                           Text(
                             dateStr,
-                            style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
+                            style: (textTheme.labelMedium ??
+                                    const TextStyle(fontSize: 12))
+                                .copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    if (item.tags != null)
-                      for (final tag in item.tags!)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: scheme.surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(100),
-                            border: Border.all(color: scheme.outlineVariant),
-                          ),
-                          child: Text(
-                            '#$tag',
-                            style: (textTheme.labelMedium ?? const TextStyle(fontSize: 12)).copyWith(
-                              color: scheme.onSurface,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
                   ],
                 ),
+                if (item.tags != null && item.tags!.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final tag in item.tags!) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(color: scheme.outlineVariant),
+                            ),
+                            child: Text(
+                              '#$tag',
+                              style: (textTheme.labelMedium ??
+                                      const TextStyle(fontSize: 12))
+                                  .copyWith(
+                                color: scheme.onSurface,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
 
                 // Unconfigured Gemini Inline Prompt

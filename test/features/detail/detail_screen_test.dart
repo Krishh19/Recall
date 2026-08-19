@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:recall/core/providers/theme_controller.dart';
 import 'package:recall/core/theme.dart';
 import 'package:recall/data/models/saved_item.dart';
 import 'package:recall/data/repositories/saved_item_repository.dart';
@@ -112,6 +113,67 @@ void main() {
       await tester.pump();
 
       expect(repository.toggledReadIds, contains(sampleItem.id));
+    });
+
+    testWidgets('renders long tag list without layout overflow', (
+      tester,
+    ) async {
+      final itemWithManyTags = sampleItem.copyWith(
+        tags: [
+          'flutter',
+          'dart',
+          'riverpod',
+          'sqlite',
+          'drift',
+          'material3',
+          'expressive',
+          'gemini',
+          'ai',
+          'mobile',
+        ],
+      );
+      final repository =
+          TestSavedItemRepository(items: [itemWithManyTags]);
+
+      await tester.pumpWidget(
+        createWidgetUnderTest(
+          id: itemWithManyTags.id,
+          repository: repository,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('#flutter'), findsOneWidget);
+      expect(find.text('#mobile'), findsOneWidget);
+    });
+
+    testWidgets('renders correctly in dark mode and alternate Emerald theme preset', (
+      tester,
+    ) async {
+      final darkEmeraldScheme = AppTheme.createScheme(
+        preset: ThemePreset.emerald,
+        brightness: Brightness.dark,
+      );
+      final repository = TestSavedItemRepository(items: [sampleItem]);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            savedItemRepositoryProvider.overrideWithValue(repository),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.buildThemeData(darkEmeraldScheme),
+            home: M3ETheme(
+              data: AppTheme.darkWithSeed(ThemePreset.emerald.color!),
+              child: DetailScreen(id: sampleItem.id),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Understanding Flutter Riverpod'), findsOneWidget);
+      expect(find.text('Technology'), findsOneWidget);
     });
   });
 }
