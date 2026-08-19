@@ -226,6 +226,46 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
     }
   }
 
+  int get _stepIndex {
+    switch (_currentStep) {
+      case OnboardingStep.welcome:
+        return 0;
+      case OnboardingStep.geminiIntro:
+        return 1;
+      case OnboardingStep.geminiKeyEntry:
+      case OnboardingStep.verifying:
+        return 2;
+      case OnboardingStep.success:
+        return 3;
+    }
+  }
+
+  Widget _buildStepIndicator(ColorScheme scheme) {
+    const totalSteps = 3;
+    final currentIdx = _stepIndex;
+    if (currentIdx >= totalSteps) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(totalSteps, (index) {
+        final isActive = index == currentIdx;
+        final isPassed = index < currentIdx;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: isActive ? 24 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: (isActive || isPassed)
+                ? scheme.primary
+                : scheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        );
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -252,6 +292,8 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                   tooltip: 'Back',
                   onPressed: _handleBack,
                 ),
+          title: _buildStepIndicator(scheme),
+          centerTitle: true,
           actions: [
             if (_currentStep == OnboardingStep.welcome ||
                 _currentStep == OnboardingStep.geminiIntro)
@@ -297,43 +339,43 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight - 40),
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 // Hero Illustration / Icon
                 Column(
                   children: [
                     Container(
-                      width: 104,
-                      height: 104,
+                      width: 96,
+                      height: 96,
                       decoration: BoxDecoration(
                         color: scheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(28),
                         boxShadow: [
                           BoxShadow(
-                            color: scheme.primary.withAlpha(40),
-                            blurRadius: 24,
-                            offset: const Offset(0, 8),
+                            color: scheme.primary.withAlpha(35),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(28),
                         child: Image.asset(
                           'assets/icon.png',
                           errorBuilder: (_, _, _) => Icon(
                             Icons.auto_stories_rounded,
-                            size: 52,
+                            size: 48,
                             color: scheme.onPrimaryContainer,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     Text(
                       'Recall',
                       style: (textTheme.headlineMedium ??
@@ -345,7 +387,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       'Save anything. Remember everything.',
                       style: (textTheme.titleMedium ??
@@ -356,7 +398,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Text(
                       'Save links from across the web and let Recall turn them into useful summaries, categories, and tags.',
                       style: (textTheme.bodyLarge ??
@@ -369,7 +411,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 24),
                 Column(
                   children: [
                     SizedBox(
@@ -395,11 +437,11 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     TextButton(
                       onPressed: _handleSkip,
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                       child: Text(
                         'Skip setup',
@@ -423,9 +465,9 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight - 40),
+            constraints: BoxConstraints(minHeight: constraints.maxHeight - 24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,10 +484,10 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                       child: Icon(
                         Icons.auto_awesome_rounded,
                         color: scheme.onPrimaryContainer,
-                        size: 28,
+                        size: 26,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 18),
                     Text(
                       'Make Recall intelligent',
                       style: (textTheme.headlineSmall ??
@@ -465,10 +507,10 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                         height: 1.45,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainer,
                         borderRadius: BorderRadius.circular(20),
@@ -513,7 +555,7 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 36),
+                const SizedBox(height: 24),
                 Column(
                   children: [
                     SizedBox(
@@ -539,11 +581,11 @@ class _OnboardingFlowScreenState extends ConsumerState<OnboardingFlowScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     TextButton(
                       onPressed: _handleSkip,
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
                       child: Text(
                         "I'll do this later",
