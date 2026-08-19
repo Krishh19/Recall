@@ -152,7 +152,7 @@ CRITICAL ANTI-HALLUCINATION RULES:
     }
 
     final url =
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$key';
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=$key';
 
     final payload = {
       'contents': [
@@ -258,7 +258,7 @@ CRITICAL ANTI-HALLUCINATION RULES:
     }
   }
 
-  /// Calls Google Gemini (`gemini-2.5-flash`) to generate structured summaries and tags.
+  /// Calls Google Gemini (`gemini-3.6-flash`) to generate structured summaries and tags.
   Future<AISummaryResult> summarize({
     required String title,
     required String content,
@@ -274,7 +274,7 @@ CRITICAL ANTI-HALLUCINATION RULES:
     final promptText = 'Title: $title\n\nContent:\n$trimmedContent';
 
     final url =
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey';
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=$apiKey';
 
     final payload = {
       'system_instruction': {
@@ -291,7 +291,6 @@ CRITICAL ANTI-HALLUCINATION RULES:
       ],
       'generationConfig': {
         'responseMimeType': 'application/json',
-        'temperature': 0.2,
       },
     };
 
